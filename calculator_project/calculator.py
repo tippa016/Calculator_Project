@@ -2,9 +2,10 @@ import sys
 from PyQt6.QtWidgets import (
     QMainWindow, QApplication, QWidget,
     QLabel, QCheckBox, QComboBox, QListWidget, QLineEdit, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLineEdit, QSpinBox, QDoubleSpinBox, QSlider
+    QLineEdit, QSpinBox, QDoubleSpinBox, QSlider, QPushButton, QTextEdit,
 )
 from PyQt6.QtCore import Qt
+import controller
 
 class MainWindow(QMainWindow):
 
@@ -34,22 +35,29 @@ class MainWindow(QMainWindow):
         
         # Reading speed input
         readingspeed_label = QLabel("Reading Speed")
-        readingspeed_spinbox = QDoubleSpinBox()
+        self.readingspeed_spinbox = QDoubleSpinBox()
+        self.readingspeed_spinbox.setMinimum(0)
+        self.readingspeed_spinbox.setMaximum(100000)
 
 
         # Total pages input
         totalpages_label = QLabel("Total Pages")
-        totalpages_spinbox = QSpinBox()
+        self.totalpages_spinbox = QSpinBox()
+        self.totalpages_spinbox.setMinimum(0)
+        self.totalpages_spinbox.setMaximum(100000)
 
 
         # Current page input
         currentpage_label = QLabel("Current Page")
-        currentpage_spinbox = QSpinBox()
+        self.currentpage_spinbox = QSpinBox()
+        self.currentpage_spinbox.setMinimum(0)
 
 
         # Calculate button
         calculate_label = QLabel("Calculate")
-        calculate_button = QPushButton()
+        self.calculate_button = QPushButton("Calculate")
+        #add a calculate function
+        self.calculate_button.clicked.connect(self.calculate_reading_time)
 
 
         # Results Pane Widgets
@@ -59,8 +67,8 @@ class MainWindow(QMainWindow):
         h2_font = results_title.font()
         h2_font.setPointSize(26)
         results_title.setFont(h2_font)
-        results_window = QLineEdit("Enter the page number you want to read to in the 'total pages' box. Then, input your current page number in the 'current page' box.")
-        results_window.setMinimumHeight(100)
+        self.results_window = QTextEdit("Enter the page number you want to read to in the 'total pages' box. Then, input your current page number in the 'current page' box.")
+        self.results_window.setMinimumHeight(100)
         
 
         # Align the label
@@ -71,18 +79,18 @@ class MainWindow(QMainWindow):
         # Add our left pane widgets
         left_pane.addWidget(title_label)
         left_pane.addWidget(totalpages_label)
-        left_pane.addWidget(totalpages_spinbox)
+        left_pane.addWidget(self.totalpages_spinbox)
         left_pane.addWidget(currentpage_label)
-        left_pane.addWidget(currentpage_spinbox)
+        left_pane.addWidget(self.currentpage_spinbox)
         left_pane.addWidget(readingspeed_label)
-        left_pane.addWidget(readingspeed_spinbox)
+        left_pane.addWidget(self.readingspeed_spinbox)
 
 
         #Add our right pane widets
         right_pane.addWidget(results_title)
-        right_pane.addWidget(results_window)
+        right_pane.addWidget(self.results_window)
         right_pane.addWidget(calculate_label)
-        right_pane.addWidget(calculate_button)
+        right_pane.addWidget(self.calculate_button)
 
 
         # Add the two panes to the layout
@@ -95,6 +103,22 @@ class MainWindow(QMainWindow):
         gui.setLayout(main_layout)
         self.setCentralWidget(gui)
 
+    def calculate_reading_time(self):
+        """Calculate reading time"""
+        # Get total pages
+        total_pages = self.totalpages_spinbox.value()
+
+        # Get current page
+        current_page = self.currentpage_spinbox.value()
+
+        # Get reading speed
+        reading_speed = self.readingspeed_spinbox.value()
+
+        # Get reading time
+        results = controller.get_reading_time(total_pages,current_page,reading_speed)
+
+        # Display Results
+        self.results_window.setText(results)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
